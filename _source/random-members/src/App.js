@@ -72,7 +72,7 @@ function TabPanel(props) {
 function splitMemberList(value) {
   const members = [];
   const hashMap = {};
-  for (const s of value.split('\n').filter(s => s.trim())) {
+  for (const s of value.split('\n').filter(s => s.trim() !== '')) {
     if (!hashMap[s]) {
       hashMap[s] = 1;
       members.push(s);
@@ -127,10 +127,6 @@ export default function App() {
     setGenerateCount(event.target.value === '' ? '0' : Number(event.target.value));
   };
 
-  const handleGenerateCountInputBlur = (value) => {
-    safeSetGenerateCount(value);
-  };
-
   const handleGenerate = (event) => {
     safeSetGenerateCount(generateCount);
     const sampledMembers = getRandomSubarray(memberList, Number(generateCount));
@@ -167,7 +163,6 @@ export default function App() {
                   value={Number(generateCount)}
                   label='随机名单长度'
                   onChange={handleGenerateCountInputChange}
-                  onBlur={handleGenerateCountInputBlur}
                   variant='outlined'
                   fullWidth
                   inputProps={{
@@ -204,7 +199,6 @@ export default function App() {
                   value={Number(generateCount)}
                   label='随机名单长度'
                   onChange={handleGenerateCountInputChange}
-                  onBlur={handleGenerateCountInputBlur}
                   variant='outlined'
                   fullWidth
                   inputProps={{
