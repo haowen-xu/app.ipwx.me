@@ -84,22 +84,21 @@ function splitMemberList(value) {
 export default function App() {
   const classes = useStyles();
   // selected tab
-  const [selectedTab, setSelectedTab] = React.useState(0);
+  const [storedSelectedTab, setStoredSelectedTab] = useLocalStorage('selectedTab', '');
+  const [selectedTab, setSelectedTab] = React.useState(Number(storedSelectedTab));
   // member list
   const [storedMemberList, setStoredMemberList] = useLocalStorage('memberList', '');
   const [memberList, setMemberList] = React.useState(splitMemberList(storedMemberList));
   // result list
   const [resultList, setResultList] = useLocalStorage('resultList', '');
   // generate random count
-  const [generateCount, setGenerateCount] = useLocalStorage('generateCount', '0');
+  const [storedGenerateCount, setStoredGenerateCount] = useLocalStorage('generateCount', '0');
+  const [generateCount, setGenerateCount] = React.useState(Number(storedGenerateCount));
 
   function safeSetGenerateCount(value) {
-    value = Number(value);
-    if (value < 0) {
-      setGenerateCount(0);
-    } else if (value > memberList.length) {
-      setGenerateCount(memberList.length);
-    }
+    value = value < 0 ? 0 : (value > memberList.length ? memberList.length : value);
+    setGenerateCount(value);
+    setStoredGenerateCount(value);
   }
 
   function getRandomSubarray(arr, size) {
@@ -115,6 +114,7 @@ export default function App() {
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
+    setStoredSelectedTab(newValue);
   };
   const handleMemberListChange = (event) => {
     const members = splitMemberList(event.target.value);
@@ -123,13 +123,13 @@ export default function App() {
     safeSetGenerateCount(generateCount);
   };
 
-  const handleGenerateCountInputChange = event => {
-    setGenerateCount(event.target.value === '' ? '0' : Number(event.target.value));
+  const handleGenerateCountChange = (event, newValue) => {
+    safeSetGenerateCount(newValue);
   };
 
   const handleGenerate = (event) => {
     safeSetGenerateCount(generateCount);
-    const sampledMembers = getRandomSubarray(memberList, Number(generateCount));
+    const sampledMembers = getRandomSubarray(memberList, generateCount);
     setResultList(sampledMembers.join('\n'));
     setSelectedTab(1);
   };
@@ -154,76 +154,69 @@ export default function App() {
       </AppBar>
       <div className={classes.main}>
         <TabPanel value={selectedTab} index={0}>
-          <form noValidate autoComplete="off">
-            <div>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="generate-count-input">随机名单长度</InputLabel>
-                <Input
-                  id="generate-count-input"
-                  value={Number(generateCount)}
-                  label='随机名单长度'
-                  onChange={handleGenerateCountInputChange}
-                  variant='outlined'
-                  fullWidth
-                  inputProps={{
-                    step: 1,
-                    min: 0,
-                    max: memberList.length,
-                    type: 'number',
-                  }}
+          <form noValidate autoComplete="off" onSubmit={(e) => e.preventDefault()}>
+            <Grid container spacing={3}>
+              <Grid container item xs={12} spacing={3}>
+                <Typography id="generate-count-input" gutterBottom>随机名单长度：{generateCount}</Typography>
+                <Slider 
+                  value={generateCount}
+                  //defaultValue={generateCount}
+                  onChange={handleGenerateCountChange}
+                  aria-labelledby="generate-count-input"
+                  valueLabelDisplay="auto"
+                  step={1}
+                  min={0}
+                  max={memberList.length}
                 />
-              </FormControl>
-            </div>
-            <div style={{marginTop: '20px'}}>
-              <FormControl fullWidth>
+              </Grid>
+              <Grid container item xs={12} spacing={3}>
+                <Typography id="member-list-input" gutterBottom>
+                  请输入名单（现有 {memberList.length} 项）
+                </Typography>
                 <TextField
                   id="memberList"
-                  label={`请输入名单（现有 ${memberList.length} 项）`}
+                  aria-labelledby="member-list-input"
                   multiline
                   fullWidth
                   variant="outlined"
                   defaultValue={memberList.join('\n')}
                   onChange={handleMemberListChange} 
                 />
-              </FormControl>
-            </div>
+              </Grid>
+            </Grid>
           </form>
         </TabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <form noValidate autoComplete="off">
-            <div>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="generate-count-input">随机名单长度</InputLabel>
-                <Input
-                  id="generate-count-input"
-                  value={Number(generateCount)}
-                  label='随机名单长度'
-                  onChange={handleGenerateCountInputChange}
-                  variant='outlined'
+          <form noValidate autoComplete="off" onSubmit={(e) => e.preventDefault()}>
+            <Grid container spacing={3}>
+              <Grid container item xs={12} spacing={3}>
+                <Typography id="generate-count-input" gutterBottom>随机名单长度：{generateCount}</Typography>
+                <Slider 
+                  value={generateCount}
+                  onChange={handleGenerateCountChange}
+                  aria-labelledby="generate-count-input"
+                  valueLabelDisplay="auto"
+                  step={1}
+                  min={0}
+                  max={memberList.length}
+                />
+              </Grid>
+              <Grid container item xs={12} spacing={3}>
+                <Typography id="result-list-input" gutterBottom>随机结果</Typography>
+                <TextField
+                  id="resultList"
+                  aria-labelledby="result-list-input"
+                  multiline
                   fullWidth
-                  inputProps={{
-                    step: 1,
-                    min: 0,
-                    max: memberList.length,
-                    type: 'number',
+                  readOnly
+                  variant="outlined"
+                  value={resultList}
+                  InputProps={{
+                    readOnly: true,
                   }}
                 />
-              </FormControl>
-            </div>
-            <div style={{marginTop: '20px'}}>
-              <TextField
-                id="resultList"
-                label="随机结果"
-                multiline
-                fullWidth
-                readOnly
-                variant="outlined"
-                value={resultList}
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
-            </div>
+              </Grid>
+            </Grid>
           </form>
         </TabPanel>
       </div>
