@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <title>统计左右屁股各被打了几次</title>
+        <style type="text/css">
+            .current {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <p>按 Z 键加左边屁股的次数，按 X 键加右边屁股的次数。按 C 键归零。</p>
+        <p style="font-size: 5em">L: <span id="left">0</span>, R: <span id="right">0</span></p>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script>
+            var left = 0, right = 0;
+            $(document).keypress(function(event) {
+                console.log(event.charCode);
+                if (event.charCode == 122) {
+                    left += 1;
+                    $('#left').html(left);
+                    $('#left').addClass('current');
+                    $('#right').removeClass('current');
+                } else if (event.charCode == 120) {
+                    right += 1;
+                    $('#right').html(right);
+                    $('#right').addClass('current');
+                    $('#left').removeClass('current');
+                } else if (event.charCode == 99) {
+                    left = right = 0;
+                    $('#left').html(left);
+                    $('#right').html(right);
+                    $('#left').removeClass('current');
+                    $('#right').removeClass('current');
+                }
+            });
+        </script>
+    </body>
+</html>
